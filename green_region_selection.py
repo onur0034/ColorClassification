@@ -65,29 +65,33 @@ axes[2].axis('off')
 plt.tight_layout()
 plt.show()
 
-# 7x7 kernel (for erosion and dilation)
-kernel = np.ones((7, 7), np.uint8)
+# 3x3 kernel (for morphology)
+kernel = np.ones((3, 3), np.uint8)
 
-# Erosion - clean noise
-erosion = cv2.erode(mask_green, kernel, iterations=1)
+# Morphological opening removes small noise while preserving text
+opened = cv2.morphologyEx(mask_green, cv2.MORPH_OPEN, kernel, iterations=1)
 
-# Dilation - restore shape
-dilation = cv2.dilate(erosion, kernel, iterations=1)
+# Closing restores small gaps and smooths text regions
+closed = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel, iterations=1)
 
 # Display
-fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+fig, axes = plt.subplots(1, 4, figsize=(20, 5))
 
 axes[0].imshow(mask_green, cmap='gray')
 axes[0].set_title("Original Mask")
 axes[0].axis('off')
 
-axes[1].imshow(erosion, cmap='gray')
-axes[1].set_title("Erosion")
+axes[1].imshow(opened, cmap='gray')
+axes[1].set_title("Opened")
 axes[1].axis('off')
 
-axes[2].imshow(dilation, cmap='gray')
-axes[2].set_title("Dilation")
+axes[2].imshow(closed, cmap='gray')
+axes[2].set_title("Closed")
 axes[2].axis('off')
+
+axes[3].imshow(cv2.dilate(closed, kernel, iterations=1), cmap='gray')
+axes[3].set_title("Closed + Dilation")
+axes[3].axis('off')
 
 plt.tight_layout()
 plt.show()
